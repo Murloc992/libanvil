@@ -399,7 +399,7 @@ void region_file_reader::read_chunks(void) {
 			continue;
 
 		// Retrieve raw data
-		char raw_data[info.get_length()];
+		char* raw_data = new char[info.get_length()];
 		std::vector<char> raw_vec;
 		file.seekg(info.get_offset(), std::ios::beg);
 		file.read((char *) raw_data, info.get_length());
