@@ -1,6 +1,6 @@
 /*
- * long_tag.h
- * Copyright (C) 2012 - 2019 David Jolly
+ * long_tag.hpp
+ * Copyright (C) 2012 David Jolly
  * ----------------------
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,12 +17,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LONG_TAG_H_
-#define LONG_TAG_H_
+#ifndef LONG_TAG_HPP_
+#define LONG_TAG_HPP_
 
 #include <string>
 #include <vector>
-#include "generic_tag.h"
+#include "generic_tag.hpp"
 
 class long_tag : public generic_tag {
 private:
@@ -30,7 +30,7 @@ private:
 	/*
 	 * Long tag value
 	 */
-	long long value;
+	int64_t value;
 
 public:
 
@@ -52,12 +52,12 @@ public:
 	/*
 	 * Long tag constructor
 	 */
-	long_tag(long long value) : generic_tag(LONG) { this->value = value; }
+	long_tag(int64_t value) : generic_tag(LONG) { this->value = value; }
 
 	/*
 	 * Long tag constructor
 	 */
-	long_tag(const std::string &name, long long value) : generic_tag(name, LONG) { this->value = value; }
+	long_tag(const std::string &name, int64_t value) : generic_tag(name, LONG) { this->value = value; }
 
 	/*
 	 * Long tag destructor
@@ -87,12 +87,12 @@ public:
 	/*
 	 * Return a long tag's value
 	 */
-	long long get_value(void) { return value; }
+	int64_t get_value(void) { return value; }
 
 	/*
 	 * Set a long tag's value
 	 */
-	void set_value(long long value) { this->value = value; }
+	void set_value(int64_t value) { this->value = value; }
 
 	/*
 	 * Return a string representation of a long tag
@@ -100,4 +100,4 @@ public:
 	std::string to_string(unsigned int tab);
 };
 
-#endif // LONG_TAG_H_
+#endif

@@ -69,7 +69,13 @@ std::vector<char> long_tag::get_data(bool list_ele)  {
 		stream << (short) name.size();
 		stream << name;
 	}
-	stream << value;
+	int32_t temp; //get 4 bit pieces
+	
+	temp = value>>32; //top 32 bits
+	stream << temp; //top 32 bits in
+
+	temp = value; //should truncate, lower 32 bits
+	stream << temp; //lower 32 bits in
 	return stream.vbuf();
 }
 

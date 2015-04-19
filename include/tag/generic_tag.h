@@ -23,6 +23,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <cstdint>
 
 class generic_tag {
 public:
