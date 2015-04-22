@@ -266,7 +266,7 @@ generic_tag *region_file_reader::parse_tag(byte_stream &stream, bool is_list, ch
 			tag = new int_tag(name, read_value<int>(stream));
 			break;
 		case generic_tag::LONG:
-			tag = new long_tag(name, read_value<long>(stream));
+			tag = new long_tag(name, read_long_value<int64_t>(stream));
 			break;
 		case generic_tag::FLOAT:
 			tag = new float_tag(name, read_value<float>(stream));

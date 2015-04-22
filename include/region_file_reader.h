@@ -94,6 +94,26 @@ private:
 		return value;
 	}
 
+	template <class T>
+	T read_long_value(byte_stream &stream) {
+		T value;
+
+		// check stream status
+		if(!stream.good())
+			throw std::runtime_error("Unexpected end of stream");
+
+		// retrieve value
+		int32_t temp; //for 32 bits at a time
+
+		for (int i=0;i<sizeof(T)/4;i++){
+	
+			temp = stream>>temp; //32 bits
+			value=(value<<32)|temp; //latch
+
+		}
+		return value;
+	}
+
 public:
 
 	/*
