@@ -118,6 +118,12 @@ public:
 	 * Return a string representation of a compound tag
 	 */
 	std::string to_string(unsigned int tab);
+
+	/*
+	 * Returns the subtag with the given name;
+	 */
+	generic_tag* get_subtag(std::string name);
+
 };
 
 #endif // COMPOUND_TAG_H_

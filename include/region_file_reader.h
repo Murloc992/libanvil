@@ -94,6 +94,9 @@ private:
 		return value;
 	}
 
+	/*
+	 * Reads a long value from stream
+	 */
 	template <class T>
 	T read_long_value(byte_stream &stream) {
 		T value;

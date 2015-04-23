@@ -99,3 +99,17 @@ std::string compound_tag::to_string(unsigned int tab) {
 	ss << "}";
 	return ss.str();
 }
+
+/*
+ * Returns the subtag with the given name. Returns NULL if not found.
+ */
+generic_tag* compound_tag::get_subtag(std::string name){
+
+	for (unsigned int i=0;i<value.size();i++){ //check every subtag
+		if (value[i]->name==name){ //if names match, return
+ 			return value[i];
+		}
+	}
+
+	return NULL; //not found
+}
