@@ -76,13 +76,14 @@ bool byte_stream::operator==(const byte_stream &other) {
 /*
  * Byte stream input
  */
-bool byte_stream::operator<<(std::vector<char> input) {
+bool byte_stream::operator<<(std::vector<char> &input) {
 
 	// append to the stream
 	buff.insert(buff.begin() + pos, input.begin(), input.end());
 	pos += input.size();
 	return true;
 }
+
 
 /*
  * Byte stream input

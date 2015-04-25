@@ -110,7 +110,16 @@ public:
 	/*
 	 * Return a chunk tag's root tag data
 	 */
-	std::vector<char> get_data(void) { return root.get_data(false); }
+	std::vector<char> get_data(void) {
+		byte_stream stream(byte_stream::SWAP_ENDIAN);
+		root.get_data(false, stream); 
+		return stream.vbuf();
+	}
+
+	/*
+	 * Return a chunk tag's root tag size, equivalent to get_data().size(), but faster.
+	 */
+	unsigned int get_data_size(void){ return root.get_data_size(false);}
 
 	/*
 	 * Return a chunk tag's root tag

@@ -167,7 +167,7 @@ void region::generate_chunk(unsigned int x, unsigned int z, region &reg) {
 		if(!reg.is_filled(i)
 				&& i != index)
 			continue;
-		length = reg.get_tag_at(i).get_data().size(); //TODO, MAKE FAST
+		length = reg.get_tag_at(i).get_data_size();
 		count = (length / region_dim::SECTOR_SIZE) + 1;
 		offset = pos / region_dim::SECTOR_SIZE;
 		reg.get_header().set_info_at(i, chunk_info((offset << 8) | count, length, chunk_info::ZLIB, 0));

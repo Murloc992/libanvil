@@ -63,6 +63,15 @@ bool long_tag::operator==(const generic_tag &other) {
 std::vector<char> long_tag::get_data(bool list_ele)  {
 	byte_stream stream(byte_stream::SWAP_ENDIAN);
 
+	get_data(list_ele, stream);
+
+	return stream.vbuf();
+}
+
+/*
+ * Save a long tag's data to a stream
+ */
+void long_tag::get_data(bool list_ele, byte_stream& stream)  {
 	// form data representation
 	if(!list_ele) {
 		stream << (char) type;
@@ -76,7 +85,20 @@ std::vector<char> long_tag::get_data(bool list_ele)  {
 
 	temp = value; //should truncate, lower 32 bits
 	stream << temp; //lower 32 bits in
-	return stream.vbuf();
+}
+
+/*
+ * Return a long tag's data size, equivalent to get_data().size(), but faster.
+ */
+unsigned int long_tag::get_data_size(bool list_ele){
+	unsigned int total = 0; //nothing yet
+
+	if (!list_ele){
+		total += 1 + 2 + name.size(); //1 for type, 2 for short size, and every symbol in the name.
+	}
+
+	total += 8; //8 bytes in a long
+	return total;
 }
 
 /*

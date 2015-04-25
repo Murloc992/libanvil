@@ -22,6 +22,7 @@
 #include "../../include/tag/compound_tag.h"
 #include "../../include/tag/end_tag.h"
 
+
 /*
  * Compound tag assignment operator
  */
@@ -67,9 +68,19 @@ bool compound_tag::operator==(const generic_tag &other) {
  * Return a compound tag's data
  */
 std::vector<char> compound_tag::get_data(bool list_ele)  {
-	end_tag end;
 	byte_stream stream(byte_stream::SWAP_ENDIAN);
 
+	get_data(list_ele, stream);
+
+	return stream.vbuf();
+}
+
+/*
+ * Save a compound tag's data to a stream
+ */
+void compound_tag::get_data(bool list_ele, byte_stream& stream)  {
+	end_tag end;
+	
 	// form data representation
 	if(!list_ele) {
 		stream << (char) type;
@@ -77,9 +88,28 @@ std::vector<char> compound_tag::get_data(bool list_ele)  {
 		stream << name;
 	}
 	for(unsigned int i = 0; i < value.size(); ++i)
-		stream << value.at(i)->get_data(false);
+		value.at(i)->get_data(false, stream);
+
 	stream << end.get_data(false);
-	return stream.vbuf();
+}
+
+
+/*
+ * Return a compund tag's data size, equivalent to get_data().size(), but faster.
+ */
+unsigned int compound_tag::get_data_size(bool list_ele){
+	unsigned int total = 0; //nothing yet
+
+	if (!list_ele){
+		total += 1 + 2 + name.size(); //1 for type, 2 for short size, and every symbol in the name.
+	}
+
+	for(unsigned int i = 0; i < value.size(); ++i)
+		total += value.at(i)->get_data_size(false);  //get individual parts
+
+	total+= 1; //end tag
+
+	return total;
 }
 
 /*

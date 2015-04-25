@@ -96,7 +96,7 @@ private:
 	 */
 	template<class T>
 	unsigned int write_stream(T var) {
-		char *parts = NULL;
+		/*char *parts = NULL;
 		std::vector<unsigned char> data;
 
 		// convert to char array
@@ -105,7 +105,24 @@ private:
 		if(swap)
 			swap_endian(data);
 		buff.insert(buff.begin() + pos, data.begin(), data.end());
-		pos += data.size();
+		pos += data.size(); */
+
+		if (swap){
+			char byte;
+			//std::cout<<sizeof(T)<<"\n";
+			for (int i=sizeof(T)-1;i>=0;i--){
+				//std::cout<<i<<"\n";
+				byte=*((char*)(&var)+i); //get 1-byte chunks of memory at the var address
+				buff.push_back(byte);
+			}
+		}else{
+			char byte;
+			for (int i=0;i<sizeof(T);i++){
+				byte=*((char*)(&var)+i); //get 1-byte chunks of memory at the var address
+				buff.push_back(byte);
+			}
+		}
+		pos+=sizeof(T);
 		return SUCCESS;
 	}
 
@@ -171,7 +188,7 @@ public:
 	/*
 	 * Byte stream input
 	 */
-	bool operator<<(std::vector<char> input);
+	bool operator<<(std::vector<char> &input);
 
 	/*
 	 * Byte stream input
@@ -281,7 +298,7 @@ public:
 	/*
 	 * Returns the entire contents of the stream buffer
 	 */
-	std::vector<char> vbuf(void) { return buff; }
+	std::vector<char>& vbuf(void) { return buff; }
 
 	/*
 	 * Resets the streams position

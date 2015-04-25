@@ -63,3 +63,20 @@ std::vector<char> end_tag::get_data(bool list_ele)  {
 	data.insert(data.end(), 0);
 	return data;
 }
+
+/*
+ * Save a end tag's data to a stream
+ */
+void end_tag::get_data(bool list_ele, byte_stream& stream)  {
+
+	stream<<get_data(list_ele);
+
+}
+
+
+/*
+ * Return a end tag's data size, equivalent to get_data().size(), but faster.
+ */
+unsigned int end_tag::get_data_size(bool list_ele){
+	return 1; //just a char
+}

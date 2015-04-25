@@ -100,6 +100,16 @@ public:
 	std::vector<char> get_data(bool list_ele);
 
 	/*
+	 * Save a int array tag's data to a stream
+	 */
+	virtual void get_data(bool list_ele, byte_stream& stream);
+
+	/*
+	 * Return the size of a inr array tag's data. Equivaluent to get_data().size(), but faster;
+	 */
+	virtual unsigned int get_data_size(bool list_ele);
+
+	/*
 	 * Return a integer array tag's value
 	 */
 	std::vector<int> &get_value(void) { return value; }

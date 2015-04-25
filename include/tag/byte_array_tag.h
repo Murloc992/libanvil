@@ -95,9 +95,19 @@ public:
 	void erase(unsigned int index) { value.erase(value.begin() + index); }
 
 	/*
-	 * Return a byte array tag's data
+	 * Get a byte array tag's data
 	 */
 	std::vector<char> get_data(bool list_ele);
+
+	/*
+	 * Save a byte array tag's data to a stream
+	 */
+	void get_data(bool list_ele, byte_stream& stream);
+
+	/*
+	 * Return the size of a byte array tag's data. Equivaluent to get_data().size(), but faster;
+	 */
+	unsigned int get_data_size(bool list_ele);
 
 	/*
 	 * Return a byte array tag's value

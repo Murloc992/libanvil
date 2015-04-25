@@ -69,6 +69,15 @@ bool list_tag::operator==(const generic_tag &other) {
 std::vector<char> list_tag::get_data(bool list_ele)  {
 	byte_stream stream(byte_stream::SWAP_ENDIAN);
 
+	get_data(list_ele, stream);
+
+	return stream.vbuf();
+}
+
+/*
+ * Save a list tag's data to a stream
+ */
+void list_tag::get_data(bool list_ele, byte_stream& stream)  {
 	// form data representation
 	if(!list_ele) {
 		stream << (char) type;
@@ -78,8 +87,24 @@ std::vector<char> list_tag::get_data(bool list_ele)  {
 	stream << (char) ele_type;
 	stream << (int) value.size();
 	for(unsigned int i = 0; i < value.size(); ++i)
-		stream << value.at(i)->get_data(true);
-	return stream.vbuf();
+		value.at(i)->get_data(true, stream);
+}
+
+/*
+ * Return a list tag's data size, equivalent to get_data().size(), but faster.
+ */
+unsigned int list_tag::get_data_size(bool list_ele){
+	unsigned int total = 0; //nothing yet
+
+	if (!list_ele){
+		total += 1 + 2 + name.size(); //1 for type, 2 for short size, and every symbol in the name.
+	}
+
+	total+=1+4; //1 for ele type, 4 for size
+	for(unsigned int i = 0; i < value.size(); ++i)
+		total += value.at(i)->get_data_size(true);  //get individual parts
+
+	return total;
 }
 
 /*

@@ -90,6 +90,16 @@ public:
 	std::vector<char> get_data(bool list_ele);
 
 	/*
+	 * Save a compound tag's data to a stream
+	 */
+	void get_data(bool list_ele, byte_stream& stream);
+
+	/*
+	 * Return the size of a compound tag's data. Equivaluent to get_data().size(), but faster;
+	 */
+	unsigned int get_data_size(bool list_ele);
+
+	/*
 	 * Return a compound tag's value
 	 */
 	std::vector<generic_tag *> &get_value(void) { return value; }

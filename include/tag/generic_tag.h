@@ -1,6 +1,6 @@
 /*
- * generic_tag.h
- * Copyright (C) 2012 - 2019 David Jolly
+ * generic_tag.hpp
+ * Copyright (C) 2012 David Jolly
  * ----------------------
  *
  * This program is free software: you can redistribute it and/or modify
@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 #include <cstdint>
+#include "../byte_stream.h"
 
 class generic_tag {
 public:
@@ -41,9 +42,7 @@ public:
 	/*
 	 * Supported tag types
 	 */
-	enum TYPE {
-		END, BYTE, SHORT, INT, LONG, FLOAT, DOUBLE, BYTE_ARRAY, STRING, LIST, COMPOUND, INT_ARRAY, LONG_ARRAY
-	};
+	enum TYPE { END, BYTE, SHORT, INT, LONG, FLOAT, DOUBLE, BYTE_ARRAY, STRING, LIST, COMPOUND, INT_ARRAY };
 
 	/*
 	 * Generic tag constructor
@@ -93,7 +92,23 @@ public:
 	/*
 	 * Return a generic tag's data
 	 */
-	virtual std::vector<char> get_data(bool list_ele) = 0;
+	virtual std::vector<char> get_data(bool list_ele) {
+		byte_stream stream(byte_stream::SWAP_ENDIAN);
+
+		get_data(list_ele, stream); //get the data
+
+		return stream.vbuf();
+	}
+
+	/*
+	 * Save a generic tag's data to a stream
+	 */
+	virtual void get_data(bool list_ele, byte_stream& stream) { return this->get_data(list_ele, stream); }
+
+	/*
+	 * Return the size of a generic tag's data. Equivaluent to get_data().size(), but faster;
+	 */
+	virtual unsigned int get_data_size(bool list_ele) { return this->get_data_size(list_ele); }
 
 	/*
 	 * Return a generic tag's name
@@ -126,4 +141,4 @@ public:
 	static std::string type_to_string(unsigned char type);
 };
 
-#endif // GENERIC_TAG_H_
+#endif

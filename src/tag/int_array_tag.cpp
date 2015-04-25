@@ -68,6 +68,15 @@ bool int_array_tag::operator==(const generic_tag &other) {
 std::vector<char> int_array_tag::get_data(bool list_ele)  {
 	byte_stream stream(byte_stream::SWAP_ENDIAN);
 
+	get_data(list_ele, stream);
+
+	return stream.vbuf();
+}
+
+/*
+ * Save a int array tag's data to a stream
+ */
+void int_array_tag::get_data(bool list_ele, byte_stream& stream)  {
 	// form data representation
 	if(!list_ele) {
 		stream << (char) type;
@@ -77,8 +86,22 @@ std::vector<char> int_array_tag::get_data(bool list_ele)  {
 	stream << (int) value.size();
 	for(unsigned int i = 0; i < value.size(); ++i)
 		stream << value.at(i);
-	return stream.vbuf();
 }
+
+/*
+ * Return a int array tag's data size, equivalent to get_data().size(), but faster.
+ */
+unsigned int int_array_tag::get_data_size(bool list_ele){
+	unsigned int total = 0; //nothing yet
+
+	if (!list_ele){
+		total += 1 + 2 + name.size(); //1 for type, 2 for short size, and every symbol in the name.
+	}
+	total+=4; //array size,  int = 4 bytes
+	total+=value.size()*4; //4 bytes in an int, this many ints
+	return total;
+}
+
 
 /*
  * Return a string representation of a integer array tag

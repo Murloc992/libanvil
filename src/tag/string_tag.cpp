@@ -63,15 +63,36 @@ bool string_tag::operator==(const generic_tag &other) {
 std::vector<char> string_tag::get_data(bool list_ele)  {
 	byte_stream stream(byte_stream::SWAP_ENDIAN);
 
+	get_data(list_ele, stream);
+
+	return stream.vbuf();
+}
+
+/*
+ * Save a string tag's data to a stream
+ */
+void string_tag::get_data(bool list_ele, byte_stream& stream)  {
 	// form data representation
 	if(!list_ele) {
 		stream << (char) type;
 		stream << (short) name.size();
 		stream << name;
 	}
-	stream << (short) value.size();
 	stream << value;
-	return stream.vbuf();
+}
+
+/*
+ * Return a double tag's data size, equivalent to get_data().size(), but faster.
+ */
+unsigned int string_tag::get_data_size(bool list_ele){
+	unsigned int total = 0; //nothing yet
+
+	if (!list_ele){
+		total += 1 + 2 + name.size(); //1 for type, 2 for short size, and every symbol in the name.
+	}
+
+	total+= 2 + value.size(); //1 byte in short size, and then chars
+	return total;
 }
 
 /*

@@ -58,11 +58,20 @@ bool int_tag::operator==(const generic_tag &other) {
 }
 
 /*
- * Return a integer tag's data
+ * Return a int tag's data
  */
 std::vector<char> int_tag::get_data(bool list_ele)  {
 	byte_stream stream(byte_stream::SWAP_ENDIAN);
 
+	get_data(list_ele, stream);
+
+	return stream.vbuf();
+}
+
+/*
+ * Save a int tag's data to a stream
+ */
+void int_tag::get_data(bool list_ele, byte_stream& stream)  {
 	// form data representation
 	if(!list_ele) {
 		stream << (char) type;
@@ -70,7 +79,20 @@ std::vector<char> int_tag::get_data(bool list_ele)  {
 		stream << name;
 	}
 	stream << value;
-	return stream.vbuf();
+}
+
+/*
+ * Return a int tag's data size, equivalent to get_data().size(), but faster.
+ */
+unsigned int int_tag::get_data_size(bool list_ele){
+	unsigned int total = 0; //nothing yet
+
+	if (!list_ele){
+		total += 1 + 2 + name.size(); //1 for type, 2 for short size, and every symbol in the name.
+	}
+
+	total += 4; //4 bytes in an int
+	return total;
 }
 
 /*

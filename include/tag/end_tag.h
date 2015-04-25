@@ -63,6 +63,16 @@ public:
 	std::vector<char> get_data(bool list_ele);
 
 	/*
+	 * Save a end tag's data to a stream
+	 */
+	void get_data(bool list_ele, byte_stream& stream);
+
+	/*
+	 * Return the size of a end tag's data. Equivaluent to get_data().size(), but faster;
+	 */
+	virtual unsigned int get_data_size(bool list_ele);
+
+	/*
 	 * Return a string representation of a end tag
 	 */
 	std::string to_string(unsigned int tab) { return generic_tag::to_string(tab); }

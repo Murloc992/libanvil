@@ -63,6 +63,15 @@ bool short_tag::operator==(const generic_tag &other) {
 std::vector<char> short_tag::get_data(bool list_ele)  {
 	byte_stream stream(byte_stream::SWAP_ENDIAN);
 
+	get_data(list_ele, stream);
+
+	return stream.vbuf();
+}
+
+/*
+ * Save a short tag's data to a stream
+ */
+void short_tag::get_data(bool list_ele, byte_stream& stream)  {
 	// form data representation
 	if(!list_ele) {
 		stream << (char) type;
@@ -70,7 +79,20 @@ std::vector<char> short_tag::get_data(bool list_ele)  {
 		stream << name;
 	}
 	stream << value;
-	return stream.vbuf();
+}
+
+/*
+ * Return a short tag's data size, equivalent to get_data().size(), but faster.
+ */
+unsigned int short_tag::get_data_size(bool list_ele){
+	unsigned int total = 0; //nothing yet
+
+	if (!list_ele){
+		total += 1 + 2 + name.size(); //1 for type, 2 for short size, and every symbol in the name.
+	}
+
+	total += 2; //2 bytes in a short
+	return total;
 }
 
 /*
