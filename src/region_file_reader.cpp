@@ -310,10 +310,10 @@ generic_tag *region_file_reader::parse_tag(byte_stream &stream, bool is_list, ch
 			tag = new int_array_tag(name, read_array_value<int>(stream));
 			break;
 		case generic_tag::LONG_ARRAY:
-			tag = new long_array_tag(name, read_array_value<long>(stream));
+			tag = new long_array_tag(name, read_array_value<int64_t>(stream));
 			break;
 		default:
-			throw std::runtime_error("Unknown tag type");
+			throw std::runtime_error("Unknown tag type: " + std::to_string(type));
 			break;
 	}
 	return tag;

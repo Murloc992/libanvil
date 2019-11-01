@@ -42,7 +42,7 @@ public:
 	/*
 	 * Supported tag types
 	 */
-	enum TYPE { END, BYTE, SHORT, INT, LONG, FLOAT, DOUBLE, BYTE_ARRAY, STRING, LIST, COMPOUND, INT_ARRAY };
+	enum TYPE { END, BYTE, SHORT, INT, LONG, FLOAT, DOUBLE, BYTE_ARRAY, STRING, LIST, COMPOUND, INT_ARRAY, LONG_ARRAY };
 
 	/*
 	 * Generic tag constructor

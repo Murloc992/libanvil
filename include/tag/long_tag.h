@@ -22,7 +22,7 @@
 
 #include <string>
 #include <vector>
-#include "generic_tag.hpp"
+#include "generic_tag.h"
 
 class long_tag : public generic_tag {
 private:

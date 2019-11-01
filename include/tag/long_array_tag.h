@@ -33,7 +33,7 @@ private:
 	/*
 	 * Long array tag value
 	 */
-	std::vector<long> value;
+	std::vector<int64_t> value;
 
 public:
 
@@ -55,12 +55,12 @@ public:
 	/*
 	 * Long array tag constructor
 	 */
-	long_array_tag(std::vector<long> value) : generic_tag(LONG_ARRAY) { this->value = value; }
+	long_array_tag(std::vector<int64_t> value) : generic_tag(LONG_ARRAY) { this->value = value; }
 
 	/*
 	 * Long array tag constructor
 	 */
-	long_array_tag(const std::string &name, std::vector<long> value) : generic_tag(name,
+	long_array_tag(const std::string &name, std::vector<int64_t> value) : generic_tag(name,
 																				   LONG_ARRAY) { this->value = value; }
 
 	/*
@@ -86,7 +86,7 @@ public:
 	/*
 	 * Returns a long array tag integer at a given index
 	 */
-	long &at(unsigned int index) { return value.at(index); }
+	int64_t &at(unsigned int index) { return value.at(index); }
 
 	/*
 	 * Returns a long array tag's empty status
@@ -106,22 +106,22 @@ public:
 	/*
 	 * Return a integer array tag's value
 	 */
-	std::vector<long> &get_value(void) { return value; }
+	std::vector<int64_t> &get_value(void) { return value; }
 
 	/*
 	 * Insert a integer into a integer array tag at a given index
 	 */
-	void insert(long value, unsigned int index) { this->value.insert(this->value.begin() + index, value); }
+	void insert(int64_t value, unsigned int index) { this->value.insert(this->value.begin() + index, value); }
 
 	/*
 	 * Insert a integer onto the tail of a integer array tag
 	 */
-	void push_back(long value) { this->value.push_back(value); }
+	void push_back(int64_t value) { this->value.push_back(value); }
 
 	/*
 	 * Set a integer array tag's value
 	 */
-	void set_value(std::vector<long> &value) { this->value = value; }
+	void set_value(std::vector<int64_t> &value) { this->value = value; }
 
 	/*
 	 * Returns a long array tag value's size
