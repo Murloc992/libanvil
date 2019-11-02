@@ -20,6 +20,8 @@
 #include <sstream>
 #include "../include/byte_stream.h"
 
+std::vector<unsigned char> byte_stream::data;
+
 /*
  * Byte stream constructor
  */
@@ -209,13 +211,13 @@ void byte_stream::clear(void) {
 /*
  * Convert between endian types
  */
-void byte_stream::swap_endian(std::vector<unsigned char> &data) {
+void byte_stream::swap_endian(std::vector<unsigned char> &dataVec) {
 	std::vector<unsigned char> rev;
 
 	// reverse the order of elements
-	for(int i = data.size() - 1; i >= 0; --i)
-		rev.push_back(data.at(i));
-	data = rev;
+	for(int i = dataVec.size() - 1; i >= 0; --i)
+		rev.push_back(dataVec.at(i));
+    dataVec = rev;
 }
 
 /*

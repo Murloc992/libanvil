@@ -26,6 +26,7 @@
 
 class byte_stream {
 private:
+    static std::vector<unsigned char> data; // Use a shared buffer to reduce number of (de-)allocations required
 
 	/*
 	 * Stream buffer
@@ -48,7 +49,7 @@ private:
 	 */
 	template<class T>
 	unsigned int read_stream(T &var) {
-		std::vector<unsigned char> data;
+        data.clear();
 
 		// assign type T from stream
 		unsigned int width = sizeof(T);
@@ -60,8 +61,10 @@ private:
 		if(swap)
 			swap_endian(data);
 		var = 0;
-		for(unsigned int i = 0; i < width; ++i)
-			var |= (data.at(i) << (8 * ((width - 1) - i)));
+        for(unsigned int i = 0; i < width; ++i) {
+            T value = data.at(i); // Required to ensure the type sizes match when shifting
+            var |= (value << (8 * ((width - 1) - i)));
+        }
 		return SUCCESS;
 	}
 
@@ -71,7 +74,7 @@ private:
 	 */
 	template<class T>
 	unsigned int read_stream_float(T &var) {
-		std::vector<unsigned char> data;
+        data.clear();
 
 		// assign type T from stream
 		for(unsigned int i = 0; i < sizeof(T); ++i) {

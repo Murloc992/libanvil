@@ -58,6 +58,7 @@ private:
 
 		// retrieve value
 		ele_len = read_value<int>(stream);
+        value.reserve(ele_len);
 		for(int i = 0; i < ele_len; ++i)
 			value.push_back(read_value<T>(stream));
 		return value;
@@ -77,6 +78,12 @@ private:
 	 * Reads a string tag value from stream
 	 */
 	std::string read_string_value(byte_stream &stream);
+
+	/*
+	 * Reads all bits in range from start to end from the given buffer, eg.
+	 * val = 0b 1011 1010, start = 0, end = 5 it will return 0b 1 1010
+	 */
+    uint64_t getBits(uint64_t val, unsigned int start, unsigned int end);
 
 	/*
 	 * Reads a numeric tag value from stream
@@ -109,7 +116,7 @@ private:
 		int32_t temp; //for 32 bits at a time
 
 		for (int i=0;i<sizeof(T)/4;i++){
-	
+
 			temp = stream>>temp; //32 bits
 			value=(value<<32)|temp; //latch
 
