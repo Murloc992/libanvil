@@ -26,7 +26,6 @@
 
 class byte_stream {
 private:
-    static std::vector<unsigned char> data; // Use a shared buffer to reduce number of (de-)allocations required
 
 	/*
 	 * Stream buffer
@@ -43,50 +42,58 @@ private:
 	 */
 	bool swap;
 
-	/*
-	 * Read byte stream into variable
-	 * (char, short, int, long)
-	 */
-	template<class T>
-	unsigned int read_stream(T &var) {
-        data.clear();
+    /*
+     * Number of entries in buff
+     */
+    unsigned int numberOfEntries;
 
-		// assign type T from stream
-		unsigned int width = sizeof(T);
-		for(unsigned int i = 0; i < width; ++i) {
-			if(available() == END_OF_STREAM)
-				return END_OF_STREAM;
-			data.push_back(buff.at(pos++));
-		}
-		if(swap)
-			swap_endian(data);
-		var = 0;
-        for(unsigned int i = 0; i < width; ++i) {
-            T value = data.at(i); // Required to ensure the type sizes match when shifting
-            var |= (value << (8 * ((width - 1) - i)));
+    /*
+     * Read byte stream into variable
+     * (char, short, int, long)
+     */
+    template<class T>
+    unsigned int read_stream(T& var) {
+        unsigned int remainingValues = available();
+        if (remainingValues <  sizeof(T))
+            return END_OF_STREAM;
+
+        // assign type T from stream
+        var = 0;
+        unsigned int width = sizeof(T);
+        for (unsigned int i = 0; i < width; ++i) {
+            T value = buff.at(pos++) & 0xFF; // Required to ensure the type sizes match when shifting
+
+            uint8_t numberOfShifts = (8 * ((width - 1) - i));
+            if (swap) {
+                numberOfShifts = 8 * width - (numberOfShifts + 8);
+            }
+
+            var |= (value << numberOfShifts);
         }
-		return SUCCESS;
-	}
+        return SUCCESS;
+    }
 
-	/*
-	 * Read byte stream into variable
-	 * (float, double)
-	 */
-	template<class T>
-	unsigned int read_stream_float(T &var) {
-        data.clear();
+    /*
+     * Read byte stream into variable
+     * (float, double)
+     */
+    template<class T>
+    unsigned int read_stream_float(T& var) {
+        std::vector<unsigned char> data;
 
-		// assign type T from stream
-		for(unsigned int i = 0; i < sizeof(T); ++i) {
-			if(available() == END_OF_STREAM)
-				return END_OF_STREAM;
-			data.push_back(buff.at(pos++));
-		}
-		if(swap)
-			swap_endian(data);
-		var = atof((char *) data.data());
-		return SUCCESS;
-	}
+        unsigned int remainingValues = available();
+        if (remainingValues <  sizeof(T))
+            return END_OF_STREAM;
+
+        // assign type T from stream
+        for (unsigned int i = 0; i < sizeof(T); ++i) {
+            data.push_back(buff.at(pos++));
+        }
+        if (swap)
+            swap_endian(data);
+        var = atof((char*)data.data());
+        return SUCCESS;
+    }
 
 	/*
 	 * Convert between endian types
@@ -126,6 +133,7 @@ private:
 			}
 		}
 		pos+=sizeof(T);
+        numberOfEntries = buff.size();
 		return SUCCESS;
 	}
 

@@ -20,7 +20,6 @@
 #include <sstream>
 #include "../include/byte_stream.h"
 
-std::vector<unsigned char> byte_stream::data;
 
 /*
  * Byte stream constructor
@@ -30,6 +29,7 @@ byte_stream::byte_stream(const std::string &buff) {
 	for(unsigned int i = 0; i < buff.length(); ++i)
 		this->buff.push_back(buff.at(i));
 	swap = NO_SWAP_ENDIAN;
+    numberOfEntries = buff.size();
 }
 
 /*
@@ -39,6 +39,7 @@ byte_stream::byte_stream(std::vector<char> &buff) {
 	pos = 0;
 	this->buff = buff;
 	swap = NO_SWAP_ENDIAN;
+    numberOfEntries = buff.size();
 }
 
 /*
@@ -54,6 +55,7 @@ byte_stream &byte_stream::operator=(const byte_stream &other) {
 	pos = other.pos;
 	buff = other.buff;
 	swap = other.swap;
+    numberOfEntries = other.numberOfEntries;
 	return *this;
 }
 
@@ -83,6 +85,7 @@ bool byte_stream::operator<<(std::vector<char> &input) {
 	// append to the stream
 	buff.insert(buff.begin() + pos, input.begin(), input.end());
 	pos += input.size();
+    numberOfEntries = buff.size();
 	return true;
 }
 
@@ -95,6 +98,7 @@ bool byte_stream::operator<<(const std::string &input) {
 	// append to the stream
 	for(unsigned int i = 0; i < input.size(); ++i)
 		buff.insert(buff.begin() + pos++, input.at(i));
+    numberOfEntries = buff.size();
 	return true;
 }
 
@@ -102,11 +106,6 @@ bool byte_stream::operator<<(const std::string &input) {
  * Byte stream output
  */
 bool byte_stream::operator>>(char &output) {
-
-	// check if end of stream is reached
-	if(available() == END_OF_STREAM)
-		return END_OF_STREAM;
-
 	// assign char from stream
 	output = buff[pos++];
 	return SUCCESS;
@@ -116,11 +115,6 @@ bool byte_stream::operator>>(char &output) {
  * Byte stream output
  */
 bool byte_stream::operator>>(short &output) {
-
-	// check if end of stream is reached
-	if(available() == END_OF_STREAM)
-		return END_OF_STREAM;
-
 	// read short from stream
 	return read_stream<short>(output);
 }
@@ -129,11 +123,6 @@ bool byte_stream::operator>>(short &output) {
  * Byte stream output
  */
 bool byte_stream::operator>>(int &output) {
-
-	// check if end of stream is reached
-	if(available() == END_OF_STREAM)
-		return END_OF_STREAM;
-
 	// read short from stream
 	return read_stream<int>(output);
 }
@@ -142,11 +131,6 @@ bool byte_stream::operator>>(int &output) {
  * Byte stream output
  */
 bool byte_stream::operator>>(long &output) {
-
-	// check if end of stream is reached
-	if(available() == END_OF_STREAM)
-		return END_OF_STREAM;
-
 	// read short from stream
 	return read_stream<long>(output);
 }
@@ -155,11 +139,6 @@ bool byte_stream::operator>>(long &output) {
  * Byte stream output
  */
 bool byte_stream::operator>>(long long &output) {
-
-	// check if end of stream is reached
-	if(available() == END_OF_STREAM)
-		return END_OF_STREAM;
-
 	// read short from stream
 	return read_stream<long long>(output);
 }
@@ -168,11 +147,6 @@ bool byte_stream::operator>>(long long &output) {
  * Byte stream output
  */
 bool byte_stream::operator>>(float &output) {
-
-	// check if end of stream is reached
-	if(available() == END_OF_STREAM)
-		return END_OF_STREAM;
-
 	// read short from stream
 	return read_stream_float<float>(output);
 }
@@ -181,11 +155,6 @@ bool byte_stream::operator>>(float &output) {
  * Byte stream output
  */
 bool byte_stream::operator>>(double &output) {
-
-	// check if end of stream is reached
-	if(available() == END_OF_STREAM)
-		return END_OF_STREAM;
-
 	// read short from stream
 	return read_stream_float<double>(output);
 }
@@ -194,7 +163,7 @@ bool byte_stream::operator>>(double &output) {
  * Returns the available bytes left in the stream
  */
 unsigned int byte_stream::available(void) {
-	unsigned int remaining = buff.size() - pos;
+	unsigned int remaining = numberOfEntries - pos;
 	if(remaining <= 0)
 		return END_OF_STREAM;
 	return remaining;
@@ -206,18 +175,19 @@ unsigned int byte_stream::available(void) {
 void byte_stream::clear(void) {
 	buff.clear();
 	pos = 0;
+    numberOfEntries = 0;
 }
 
 /*
  * Convert between endian types
  */
-void byte_stream::swap_endian(std::vector<unsigned char> &dataVec) {
+void byte_stream::swap_endian(std::vector<unsigned char> &data) {
 	std::vector<unsigned char> rev;
 
 	// reverse the order of elements
-	for(int i = dataVec.size() - 1; i >= 0; --i)
-		rev.push_back(dataVec.at(i));
-    dataVec = rev;
+	for(int i = data.size() - 1; i >= 0; --i)
+		rev.push_back(data.at(i));
+    data = rev;
 }
 
 /*
