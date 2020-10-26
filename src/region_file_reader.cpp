@@ -19,7 +19,6 @@
 
 #include <sstream>
 #include <vector>
-#include <iostream>
 #include "../include/chunk_info.h"
 #include "../include/chunk_tag.h"
 #include "../include/compression.h"
@@ -141,102 +140,38 @@ int region_file_reader::get_block_at(unsigned int x, unsigned int z, unsigned in
  * Returns a region's blocks at a given x, z coord
  */
 std::vector<int> region_file_reader::get_blocks_at(unsigned int x, unsigned int z) {
-    std::vector<generic_tag*> sections;
-    unsigned int pos = z * region_dim::CHUNK_WIDTH + x;
+	std::vector<int> all_blocks;
+	std::vector<char> sect_blocks;
+	std::vector<generic_tag *> section;
+	unsigned int pos = z * region_dim::CHUNK_WIDTH + x;
 
-    // For debug
-    std::vector<generic_tag*> xPosEntries = reg.get_tag_at(pos).get_sub_tag_by_name("xPos");
-    int xPos = static_cast<int_tag*>(xPosEntries.at(0))->get_value();
-    std::vector<generic_tag*> zPosEntries = reg.get_tag_at(pos).get_sub_tag_by_name("zPos");
-    int zPos = static_cast<int_tag*>(zPosEntries.at(0))->get_value();
+	// retrieve chunk data
+	section = reg.get_tag_at(pos).get_sub_tag_by_name("Blocks");
 
-    sections = reg.get_tag_at(pos).get_sub_tag_by_name("Sections");
+	// return an empty vector if no blocks exists in a given chunk
+	if (section.empty())
+	{
+		//all_blocks.insert(all_blocks.begin(), 65536, 0);
+		return all_blocks;
+	}
+		
 
-    if (sections.size() != 1) {
-        throw std::out_of_range("Number of sections is not equal to 1");
-    }
+	// iterate through a series of sections combining the blocks
+	for(int i = 15; i >= 0; --i) {
+		if (i >= section.size())
+		{
+			all_blocks.insert(all_blocks.begin(), 4096, 0); // add air blocks
+		}
+		else
+		{
+			sect_blocks = static_cast<byte_array_tag*>(section.at(i))->get_value();
+			all_blocks.insert(all_blocks.begin(), sect_blocks.begin(), sect_blocks.end());
+		}
+	}
 
-    list_tag* sectionList = static_cast<list_tag*>(sections[0]);
-    for (int i = 0; i < sectionList->size(); ++i) {
-        compound_tag* sectionEntry = static_cast<compound_tag*>(sectionList->at(i));
+	// TODO: check for "AddBlock" tag and apply to block ids
 
-        byte_tag* yValue = static_cast<byte_tag*>(sectionEntry->get_subtag("Y"));
-        char yPos = yValue->get_value();
-
-        std::cout << "In " << xPos << " " << +yPos << " " << zPos << std::endl;
-
-        generic_tag* blockStates = sectionEntry->get_subtag("BlockStates");
-        if (!blockStates) {
-            continue; // air-only subchunks are empty
-        }
-        generic_tag* palette = sectionEntry->get_subtag("Palette");
-
-        std::vector<int64_t> blockStateEntries = static_cast<long_array_tag*>(blockStates)->get_value();
-        std::vector<generic_tag*> paletteEntries = static_cast<list_tag*>(palette)->get_value();
-
-        // Iterate through block states, calculate palette indices and query indices value
-        int bitPerIndex = blockStateEntries.size() * 64 / 4096;
-        std::vector<int> retVal(4096, 0); // 4096 times 0
-
-        int subX = 0;
-        int subY = 0;
-        int subZ = 0;
-
-        int currentRefIndex = 0;
-
-        int indexCounter=0;
-        uint64_t index = 0;
-        for (int i = 0; i < 4096; ++i) {
-
-            size_t indexOfInterest = indexCounter / 64;
-            unsigned int lowerBound = indexCounter % 64;
-            unsigned int upperBound = lowerBound + bitPerIndex;
-            uint64_t paletteIndex = 0;
-            if (upperBound > 64) {
-                // The upper bound is in the next index
-                uint64_t lowerBits = getBits(blockStateEntries[indexOfInterest], lowerBound, 64); // Get remaining bits in current index
-                uint64_t higherBits = getBits(blockStateEntries[indexOfInterest + 1], 0, upperBound - 64); // And the one from the next entry
-
-                paletteIndex = (higherBits << (64 - lowerBound) | lowerBits); // Combine values
-            }
-            else {
-                paletteIndex = getBits(blockStateEntries[indexOfInterest], lowerBound, upperBound);
-            }
-            std::cout << "My paletteIndex: " << paletteIndex << " ";
-
-            if (paletteIndex >= paletteEntries.size()) {
-                throw std::out_of_range("Palette index out-of-range");
-            }
-            generic_tag* compountEntry = static_cast<compound_tag*>(paletteEntries[paletteIndex])->get_subtag("Name");
-            std::string name = static_cast<string_tag*>(compountEntry)->get_value();
-
-            std::cout << " at " << subX << " " << subY << " " << subZ << ": " << name << std::endl;
-            currentRefIndex++;
-
-            // TODO Check if this is meant by XZY order and if positions actually correspond to ingame values
-            subX++;
-            if (subX > 15) {
-                subX = 0;
-                subZ += 1;
-
-                if (subZ > 15) {
-                    subZ = 0;
-                    subY++;
-                }
-
-                if (subY > 15) {
-                    subY = 0;
-                    std::cout << "Subchunk should finish now" << std::endl;
-                }
-            }
-
-            indexCounter += bitPerIndex;
-        }//for
-
-        std::cout << "Subchunk finished" << std::endl;
-    }//for sectionEntries (aka subchunks)
-
-    return {};
+	return all_blocks;
 }
 
 /*
@@ -494,9 +429,9 @@ void region_file_reader::read_chunks(void) {
 			break;
 		}
 
-        // use data to fill chunk tag
-        parse_chunk_tag(raw_vec, reg.get_tag_at(i));
-    }
+		// use data to fill chunk tag
+		parse_chunk_tag(raw_vec, reg.get_tag_at(i));
+	}
 }
 
 /*
@@ -560,11 +495,4 @@ std::string region_file_reader::read_string_value(byte_stream &stream) {
 	for(short i = 0; i < str_len; ++i)
 		value += read_value<char>(stream);
 	return value;
-}
-
-uint64_t region_file_reader::getBits(uint64_t val, unsigned int start, unsigned int end) {
-    val >>= start;
-    unsigned int relevantBits = pow(2, end-start)-1;
-    val &= relevantBits;
-    return val;
 }

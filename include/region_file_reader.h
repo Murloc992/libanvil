@@ -59,8 +59,13 @@ private:
 		// retrieve value
 		ele_len = read_value<int>(stream);
         value.reserve(ele_len);
-		for(int i = 0; i < ele_len; ++i)
-			value.push_back(read_value<T>(stream));
+		//value.resize(ele_len, 0);
+		for (int i = 0; i < ele_len; ++i)
+		{
+			const auto val = read_value<T>(stream);
+			value.emplace_back(val);
+			//value[i] = read_value<T>(stream);
+		}
 		return value;
 	}
 
