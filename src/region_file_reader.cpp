@@ -154,6 +154,8 @@ std::vector<int> region_file_reader::get_blocks_at(unsigned int x, unsigned int 
 		//all_blocks.insert(all_blocks.begin(), 65536, 0);
 		return all_blocks;
 	}
+
+	all_blocks.reserve(16 * 4096);
 		
 
 	// iterate through a series of sections combining the blocks
