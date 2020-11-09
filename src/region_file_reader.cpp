@@ -1,21 +1,21 @@
- /*
- * region_file_reader.cpp
- * Copyright (C) 2012 - 2019 David Jolly
- * ----------------------
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+/*
+* region_file_reader.cpp
+* Copyright (C) 2012 - 2019 David Jolly
+* ----------------------
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include <sstream>
 #include <vector>
@@ -42,10 +42,10 @@
 /*
  * Region file reader assignment operator
  */
-region_file_reader &region_file_reader::operator=(const region_file_reader &other) {
+region_file_reader& region_file_reader::operator=(const region_file_reader& other) {
 
 	// check for self
-	if(this == &other)
+	if (this == &other)
 		return *this;
 
 	// assign attributes
@@ -57,35 +57,35 @@ region_file_reader &region_file_reader::operator=(const region_file_reader &othe
 /*
  * Region file reader equals operator
  */
-bool region_file_reader::operator==(const region_file_reader &other) {
+bool region_file_reader::operator==(const region_file_reader& other) {
 
 	// check for self
-	if(this == &other)
+	if (this == &other)
 		return true;
 
 	// check attributes
 	return path == other.path
-			&& reg == other.reg;
+		&& reg == other.reg;
 }
 
 /*
  * Returns a region biome value at a given x, z & b coord
  */
 char region_file_reader::get_biome_at(unsigned int x, unsigned int z, unsigned int b_x, unsigned int b_z) {
-	std::vector<generic_tag *> biome;
+	std::vector<generic_tag*> biome;
 	unsigned int pos = z * region_dim::CHUNK_WIDTH + x,
-			b_pos = b_z * region_dim::BLOCK_WIDTH + b_x;
+		b_pos = b_z * region_dim::BLOCK_WIDTH + b_x;
 
 	// check coordinates
-	if(pos >= region_dim::CHUNK_COUNT
-			|| b_pos >= region_dim::BLOCK_COUNT)
+	if (pos >= region_dim::CHUNK_COUNT
+		|| b_pos >= region_dim::BLOCK_COUNT)
 		throw std::out_of_range("coordinates out-of-range");
 
 	// collect biome tags
 	biome = reg.get_tag_at(pos).get_sub_tag_by_name("Biomes");
-	if(biome.empty())
+	if (biome.empty())
 		return 0;
-	return static_cast<byte_array_tag *>(biome.at(0))->at(b_pos);
+	return static_cast<byte_array_tag*>(biome.at(0))->at(b_pos);
 }
 
 /*
@@ -93,18 +93,18 @@ char region_file_reader::get_biome_at(unsigned int x, unsigned int z, unsigned i
  */
 std::vector<char> region_file_reader::get_biomes_at(unsigned int x, unsigned int z) {
 	std::vector<char> biomes;
-	std::vector<generic_tag *> biome;
+	std::vector<generic_tag*> biome;
 	unsigned int pos = z * region_dim::CHUNK_WIDTH + x;
 
 	// check coordinates
-	if(pos >= region_dim::CHUNK_COUNT)
+	if (pos >= region_dim::CHUNK_COUNT)
 		throw std::out_of_range("coordinates out-of-range");
 
 	// collect biome tags
 	biome = reg.get_tag_at(pos).get_sub_tag_by_name("Biomes");
-	if(biome.empty())
+	if (biome.empty())
 		return biomes;
-	return static_cast<byte_array_tag *>(biome.at(0))->get_value();
+	return static_cast<byte_array_tag*>(biome.at(0))->get_value();
 }
 
 /*
@@ -112,24 +112,24 @@ std::vector<char> region_file_reader::get_biomes_at(unsigned int x, unsigned int
  */
 int region_file_reader::get_block_at(unsigned int x, unsigned int z, unsigned int b_x, unsigned int b_y, unsigned int b_z) {
 	std::vector<char> sect_blocks;
-	std::vector<generic_tag *> section;
+	std::vector<generic_tag*> section;
 	unsigned int pos = z * region_dim::CHUNK_WIDTH + x, sect;
 
 	// check coordinates
-	if(pos >= region_dim::CHUNK_COUNT)
+	if (pos >= region_dim::CHUNK_COUNT)
 		throw std::out_of_range("coordinates out-of-range");
 	section = reg.get_tag_at(pos).get_sub_tag_by_name("Blocks");
 
 	// return an air block if no blocks exists in a given chunk
-	if(section.empty())
+	if (section.empty())
 		return 0;
 
 	// check if y coord exists in file
-	if((sect = b_y / region_dim::BLOCK_WIDTH) >= section.size())
+	if ((sect = b_y / region_dim::BLOCK_WIDTH) >= section.size())
 		return 0;
 
 	// retrieve block from the appropriate section
-	sect_blocks = static_cast<byte_array_tag *>(section.at(sect))->get_value();
+	sect_blocks = static_cast<byte_array_tag*>(section.at(sect))->get_value();
 
 	// TODO: check for "AddBlock" tag and apply to block id
 
@@ -142,32 +142,40 @@ int region_file_reader::get_block_at(unsigned int x, unsigned int z, unsigned in
 std::vector<int> region_file_reader::get_blocks_at(unsigned int x, unsigned int z) {
 	std::vector<int> all_blocks;
 	std::vector<char> sect_blocks;
-	std::vector<generic_tag *> section;
+	std::vector<generic_tag*> sections;
 	unsigned int pos = z * region_dim::CHUNK_WIDTH + x;
 
 	// retrieve chunk data
-	section = reg.get_tag_at(pos).get_sub_tag_by_name("Blocks");
+	auto y_coords = reg.get_tag_at(pos).get_sub_tag_by_name("Y");
+	sections = reg.get_tag_at(pos).get_sub_tag_by_name("Blocks");
 
 	// return an empty vector if no blocks exists in a given chunk
-	if (section.empty())
+	if (sections.empty() || y_coords.empty())
 	{
 		//all_blocks.insert(all_blocks.begin(), 65536, 0);
 		return all_blocks;
 	}
 
 	all_blocks.reserve(16 * 4096);
-		
 
+
+	int32_t y_coord_tracker = y_coords.size() - 1;
+	int32_t section_tracker = sections.size() - 1;
+
+	printf("Coord size: %llu, Section size: %llu\n", y_coords.size(), sections.size());
 	// iterate through a series of sections combining the blocks
-	for(int i = 15; i >= 0; --i) {
-		if (i >= section.size())
+	for (int i = 16; i > 0; i--) {
+		auto y_coord_value = static_cast<byte_tag*>(y_coords.at(y_coord_tracker))->get_value();
+		if (y_coord_value == i)
 		{
-			all_blocks.insert(all_blocks.begin(), 4096, 0); // add air blocks
+			sect_blocks = static_cast<byte_array_tag*>(sections.at(section_tracker))->get_value();
+			all_blocks.insert(all_blocks.begin(), sect_blocks.begin(), sect_blocks.end());
+			y_coord_tracker--;
+			section_tracker--;
 		}
 		else
 		{
-			sect_blocks = static_cast<byte_array_tag*>(section.at(i))->get_value();
-			all_blocks.insert(all_blocks.begin(), sect_blocks.begin(), sect_blocks.end());
+			all_blocks.insert(all_blocks.begin(), 4096, 0); // add air blocks
 		}
 	}
 
@@ -179,11 +187,11 @@ std::vector<int> region_file_reader::get_blocks_at(unsigned int x, unsigned int 
 /*
  * Returns a region's chunk tag at a given x, z coord
  */
-chunk_tag &region_file_reader::get_chunk_tag_at(unsigned int x, unsigned int z) {
+chunk_tag& region_file_reader::get_chunk_tag_at(unsigned int x, unsigned int z) {
 	unsigned int pos = z * region_dim::CHUNK_WIDTH + x;
 
 	// check coordinates
-	if(pos >= region_dim::CHUNK_COUNT)
+	if (pos >= region_dim::CHUNK_COUNT)
 		throw std::out_of_range("coordinates out-of-range");
 	return reg.get_tag_at(pos);
 }
@@ -192,20 +200,20 @@ chunk_tag &region_file_reader::get_chunk_tag_at(unsigned int x, unsigned int z) 
  * Returns a region height value at a given x, z & b coord
  */
 int region_file_reader::get_height_at(unsigned int x, unsigned int z, unsigned int b_x, unsigned int b_z) {
-	std::vector<generic_tag *> height;
+	std::vector<generic_tag*> height;
 	unsigned int pos = z * region_dim::CHUNK_WIDTH + x,
-			b_pos = b_z * region_dim::BLOCK_WIDTH + b_x;
+		b_pos = b_z * region_dim::BLOCK_WIDTH + b_x;
 
 	// check coordinates
-	if(pos >= region_dim::CHUNK_COUNT
-			|| b_pos >= region_dim::BLOCK_COUNT)
+	if (pos >= region_dim::CHUNK_COUNT
+		|| b_pos >= region_dim::BLOCK_COUNT)
 		throw std::out_of_range("coordinates out-of-range");
 
 	// collect biome tags
 	height = reg.get_tag_at(pos).get_sub_tag_by_name("HeightMap");
-	if(height.empty())
+	if (height.empty())
 		return 0;
-	return static_cast<int_array_tag *>(height.at(0))->at(b_pos);
+	return static_cast<int_array_tag*>(height.at(0))->at(b_pos);
 }
 
 /*
@@ -213,18 +221,18 @@ int region_file_reader::get_height_at(unsigned int x, unsigned int z, unsigned i
  */
 std::vector<int> region_file_reader::get_heightmap_at(unsigned int x, unsigned int z) {
 	std::vector<int> heights;
-	std::vector<generic_tag *> height;
+	std::vector<generic_tag*> height;
 	unsigned int pos = z * region_dim::CHUNK_WIDTH + x;
 
 	// check coordinates
-	if(pos >= region_dim::CHUNK_COUNT)
+	if (pos >= region_dim::CHUNK_COUNT)
 		throw std::out_of_range("coordinates out-of-range");
 
 	// collect biome tags
 	height = reg.get_tag_at(pos).get_sub_tag_by_name("HeightMap");
-	if(height.empty())
+	if (height.empty())
 		return heights;
-	return static_cast<int_array_tag *>(height.at(0))->get_value();
+	return static_cast<int_array_tag*>(height.at(0))->get_value();
 }
 
 /*
@@ -234,7 +242,7 @@ bool region_file_reader::is_filled(unsigned int x, unsigned int z) {
 	unsigned int pos = z * region_dim::CHUNK_WIDTH + x;
 
 	// check coordinates
-	if(pos >= region_dim::CHUNK_COUNT)
+	if (pos >= region_dim::CHUNK_COUNT)
 		throw std::out_of_range("coordinates out-of-range");
 	return reg.is_filled(pos);
 }
@@ -242,92 +250,92 @@ bool region_file_reader::is_filled(unsigned int x, unsigned int z) {
 /*
  * Read a tag from data
  */
-generic_tag *region_file_reader::parse_tag(byte_stream &stream, bool is_list, char list_type) {
+generic_tag* region_file_reader::parse_tag(byte_stream& stream, bool is_list, char list_type) {
 	char type;
 	short name_len;
 	std::string name;
-	generic_tag *tag = NULL, *sub_tag = NULL;
+	generic_tag* tag = NULL, * sub_tag = NULL;
 
 	// check if stream is good
-	if(!stream.good())
+	if (!stream.good())
 		throw std::runtime_error("Unexpected end of stream");
 
 	// parse tag header
-	if(is_list)
+	if (is_list)
 		type = list_type;
 	else {
 		type = read_value<char>(stream);
-		if(type != generic_tag::END) {
+		if (type != generic_tag::END) {
 			name_len = read_value<short>(stream);
-			for(short i = 0; i < name_len; ++i)
+			for (short i = 0; i < name_len; ++i)
 				name += read_value<char>(stream);
 		}
 	}
 
 	// parse tag based off type
-	switch(type) {
-		case generic_tag::END:
-			tag = new end_tag;
-			break;
-		case generic_tag::BYTE:
-			tag = new byte_tag(name, read_value<char>(stream));
-			break;
-		case generic_tag::SHORT:
-			tag = new short_tag(name, read_value<short>(stream));
-			break;
-		case generic_tag::INT:
-			tag = new int_tag(name, read_value<int>(stream));
-			break;
-		case generic_tag::LONG:
-			tag = new long_tag(name, read_long_value<int64_t>(stream));
-			break;
-		case generic_tag::FLOAT:
-			tag = new float_tag(name, read_value<float>(stream));
-			break;
-		case generic_tag::DOUBLE:
-			tag = new double_tag(name, read_value<double>(stream));
-			break;
-		case generic_tag::BYTE_ARRAY:
-			tag = new byte_array_tag(name, read_array_value<char>(stream));
-			break;
-		case generic_tag::STRING:
-			tag = new string_tag(name, read_string_value(stream));
-			break;
-		case generic_tag::LIST: {
-			char ele_type = read_value<char>(stream);
-			int ele_len = read_value<int>(stream);
-			list_tag *lst_tag = new list_tag(name, ele_type);
+	switch (type) {
+	case generic_tag::END:
+		tag = new end_tag;
+		break;
+	case generic_tag::BYTE:
+		tag = new byte_tag(name, read_value<char>(stream));
+		break;
+	case generic_tag::SHORT:
+		tag = new short_tag(name, read_value<short>(stream));
+		break;
+	case generic_tag::INT:
+		tag = new int_tag(name, read_value<int>(stream));
+		break;
+	case generic_tag::LONG:
+		tag = new long_tag(name, read_long_value<int64_t>(stream));
+		break;
+	case generic_tag::FLOAT:
+		tag = new float_tag(name, read_value<float>(stream));
+		break;
+	case generic_tag::DOUBLE:
+		tag = new double_tag(name, read_value<double>(stream));
+		break;
+	case generic_tag::BYTE_ARRAY:
+		tag = new byte_array_tag(name, read_array_value<char>(stream));
+		break;
+	case generic_tag::STRING:
+		tag = new string_tag(name, read_string_value(stream));
+		break;
+	case generic_tag::LIST: {
+		char ele_type = read_value<char>(stream);
+		int ele_len = read_value<int>(stream);
+		list_tag* lst_tag = new list_tag(name, ele_type);
 
-			// parse all subtags and add to list
-			for(int i = 0; i < ele_len; ++i) {
-				sub_tag = parse_tag(stream, true, ele_type);
-				lst_tag->push_back(sub_tag);
-			}
-			tag = lst_tag;
-		} break;
-		case generic_tag::COMPOUND: {
-			compound_tag *cmp_tag = new compound_tag(name);
+		// parse all subtags and add to list
+		for (int i = 0; i < ele_len; ++i) {
+			sub_tag = parse_tag(stream, true, ele_type);
+			lst_tag->push_back(sub_tag);
+		}
+		tag = lst_tag;
+	} break;
+	case generic_tag::COMPOUND: {
+		compound_tag* cmp_tag = new compound_tag(name);
 
-			// parse all sub_tags and add to compound
-			do {
-				sub_tag = parse_tag(stream, false, 0);
-				if(!sub_tag)
-					throw std::runtime_error("Failed to parse tag");
-				if(sub_tag->get_type() != generic_tag::END)
-					cmp_tag->push_back(sub_tag);
-			} while(sub_tag->get_type() != generic_tag::END);
-			delete sub_tag;
-			tag = cmp_tag;
-		} break;
-		case generic_tag::INT_ARRAY:
-			tag = new int_array_tag(name, read_array_value<int>(stream));
-			break;
-		case generic_tag::LONG_ARRAY:
-			tag = new long_array_tag(name, read_array_value<int64_t>(stream));
-			break;
-		default:
-			throw std::runtime_error("Unknown tag type: " + std::to_string(type));
-			break;
+		// parse all sub_tags and add to compound
+		do {
+			sub_tag = parse_tag(stream, false, 0);
+			if (!sub_tag)
+				throw std::runtime_error("Failed to parse tag");
+			if (sub_tag->get_type() != generic_tag::END)
+				cmp_tag->push_back(sub_tag);
+		} while (sub_tag->get_type() != generic_tag::END);
+		delete sub_tag;
+		tag = cmp_tag;
+	} break;
+	case generic_tag::INT_ARRAY:
+		tag = new int_array_tag(name, read_array_value<int>(stream));
+		break;
+	case generic_tag::LONG_ARRAY:
+		tag = new long_array_tag(name, read_array_value<int64_t>(stream));
+		break;
+	default:
+		throw std::runtime_error("Unknown tag type: " + std::to_string(type));
+		break;
 	}
 	return tag;
 }
@@ -335,10 +343,10 @@ generic_tag *region_file_reader::parse_tag(byte_stream &stream, bool is_list, ch
 /*
  * Read a chunk tag from data
  */
-void region_file_reader::parse_chunk_tag(std::vector<char> &data, chunk_tag &tag) {
+void region_file_reader::parse_chunk_tag(std::vector<char>& data, chunk_tag& tag) {
 	char type;
 	std::string name;
-	generic_tag *sub_tag = NULL;
+	generic_tag* sub_tag = NULL;
 
 	// setup bytestream
 	byte_stream bstream(data);
@@ -346,22 +354,22 @@ void region_file_reader::parse_chunk_tag(std::vector<char> &data, chunk_tag &tag
 
 	// parse tags from root
 	type = read_value<char>(bstream);
-	if(type == generic_tag::END)
+	if (type == generic_tag::END)
 		return;
 	else {
 		short name_len = read_value<short>(bstream);
-		for(short i = 0; i < name_len; ++i)
+		for (short i = 0; i < name_len; ++i)
 			name += read_value<char>(bstream);
 		tag.get_root_tag().set_name(name);
 		do {
 
 			//parse subtag
 			sub_tag = parse_tag(bstream, false, 0);
-			if(!sub_tag)
+			if (!sub_tag)
 				throw std::runtime_error("Failed to parse tag");
-			if(sub_tag->get_type() != generic_tag::END)
+			if (sub_tag->get_type() != generic_tag::END)
 				tag.get_root_tag().push_back(sub_tag);
-		} while(sub_tag->get_type() != generic_tag::END);
+		} while (sub_tag->get_type() != generic_tag::END);
 		delete sub_tag;
 	}
 }
@@ -374,11 +382,11 @@ void region_file_reader::read(void) {
 
 	// attempt to open file
 	file.open(path.c_str(), std::ios::in | std::ios::binary);
-	if(!file.is_open())
+	if (!file.is_open())
 		throw std::runtime_error("Failed to open input file");
 
 	// parse the filename for coordinants
-	if(!is_region_file(path, x, z))
+	if (!is_region_file(path, x, z))
 		throw std::runtime_error("Malformated region filename");
 	reg.set_x(x);
 	reg.set_z(z);
@@ -400,26 +408,26 @@ void region_file_reader::read_chunks(void) {
 	chunk_info info;
 
 	// check if file is open
-	if(!file.is_open())
+	if (!file.is_open())
 		throw std::runtime_error("Failed to read chunk data");
 
 	// iterate though header entries, reading in chunks if they exist
-	for(unsigned int i = 0; i < region_dim::CHUNK_COUNT; ++i) {
+	for (unsigned int i = 0; i < region_dim::CHUNK_COUNT; ++i) {
 		info = reg.get_header().get_info_at(i);
 
 		// skip empty chunks
-		if(info.empty())
+		if (info.empty())
 			continue;
 
 		// Retrieve raw data
 		char* raw_data = new char[info.get_length()];
 		std::vector<char> raw_vec;
 		file.seekg(info.get_offset(), std::ios::beg);
-		file.read((char *) raw_data, info.get_length());
+		file.read((char*)raw_data, info.get_length());
 		raw_vec.assign(raw_data, raw_data + info.get_length());
 
 		// check for compression type
-		switch(info.get_type()) {
+		switch (info.get_type()) {
 		case chunk_info::GZIP:
 			throw std::runtime_error("Unsupported compression type");
 			break;
@@ -445,56 +453,56 @@ void region_file_reader::read_header(void) {
 	unsigned int offset;
 
 	// check if file is open
-	if(!file.is_open())
+	if (!file.is_open())
 		throw std::runtime_error("Failed to read header data");
 
 	// read position data into header
-	for(unsigned int i = 0; i < region_dim::CHUNK_COUNT; ++i) {
-		file.read(reinterpret_cast<char *>(&value), sizeof(value));
+	for (unsigned int i = 0; i < region_dim::CHUNK_COUNT; ++i) {
+		file.read(reinterpret_cast<char*>(&value), sizeof(value));
 		convert_endian(value);
 		reg.get_header().get_info_at(i).set_offset(value);
 	}
 
 	// read timestamp data into header
-	for(unsigned int i = 0; i < region_dim::CHUNK_COUNT; ++i) {
-		file.read(reinterpret_cast<char *>(&value), sizeof(value));
+	for (unsigned int i = 0; i < region_dim::CHUNK_COUNT; ++i) {
+		file.read(reinterpret_cast<char*>(&value), sizeof(value));
 		convert_endian(value);
 		reg.get_header().get_info_at(i).set_modified(value);
 	}
 
 	// read length and compression type data into header
-	for(unsigned int i = 0; i < region_dim::CHUNK_COUNT; ++i) {
+	for (unsigned int i = 0; i < region_dim::CHUNK_COUNT; ++i) {
 		offset = reg.get_header().get_info_at(i).get_offset();
 
 		// skip all empty chunks
-		if(!offset)
+		if (!offset)
 			continue;
 
 		// collect length and compression data
 		file.seekg((offset >> 8) * region_dim::SECTOR_SIZE, std::ios::beg);
-		file.read(reinterpret_cast<char *>(&value), sizeof(value));
+		file.read(reinterpret_cast<char*>(&value), sizeof(value));
 		convert_endian(value);
 		reg.get_header().get_info_at(i).set_length(value);
 		file.read(&type, sizeof(type));
 		reg.get_header().get_info_at(i).set_type(type);
-		reg.get_header().get_info_at(i).set_offset((unsigned int) file.tellg());
+		reg.get_header().get_info_at(i).set_offset((unsigned int)file.tellg());
 	}
 }
 
 /*
  * Reads a string tag value from stream
  */
-std::string region_file_reader::read_string_value(byte_stream &stream) {
+std::string region_file_reader::read_string_value(byte_stream& stream) {
 	short str_len;
 	std::string value;
 
 	// check stream status
-	if(!stream.good())
+	if (!stream.good())
 		throw std::runtime_error("Unexpected end of stream");
 
 	// retrieve value
 	str_len = read_value<short>(stream);
-	for(short i = 0; i < str_len; ++i)
+	for (short i = 0; i < str_len; ++i)
 		value += read_value<char>(stream);
 	return value;
 }
